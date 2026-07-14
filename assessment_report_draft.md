@@ -2,9 +2,9 @@
 **Module:** Computational Intelligence (CIS 6005)  
 **Assessment:** WRIT1 - Deep Learning Plus AI Mini Project  
 **Target Dataset:** Real Estate House Price Prediction (`estate_train.csv`)  
-**Trained Models:** Ridge Regression, Decision Tree Regressor, Random Forest Regressor  
-**Artifact Link:** [estate_test_predictions.csv](file:///c:/Users/DELL/Desktop/ML/Notebook/artifacts/estate_test_predictions.csv)  
-**Application Code:** [app.py](file:///c:/Users/DELL/Desktop/ML/app.py) | [templates/index.html](file:///c:/Users/DELL/Desktop/ML/templates/index.html)
+**Trained Models:** Linear Regression, XGBoost Regressor, Random Forest Regressor  
+**Artifact Link:** [submission.csv](file:///c:/Users/DELL/Desktop/Predict_housing_price/submission.csv)  
+**Application Code:** [app.py](file:///c:/Users/DELL/Desktop/Predict_housing_price/app.py) | [templates/index.html](file:///c:/Users/DELL/Desktop/Predict_housing_price/templates/index.html)
 
 ---
 
@@ -72,20 +72,20 @@ graph TD
     C --> D[ColumnTransformer Preprocessing: Imputation + StandardScaler + OrdinalEncoder]
     D --> E[Train-Test Split 80/20]
     E --> F[GridSearchCV Hyperparameter Tuning]
-    F --> G[Random Forest Best Estimator]
+    F --> G[Linear, RF, and XGBoost Best Estimators]
     G --> H[Model Serialization: joblib.dump]
     H --> I[Flask Web Server: app.py]
     J[estate_test.csv] --> K[Impute Test Age via Train Median]
     K --> L[Test set Binning]
     L --> M[Fitted Preprocessor Transform]
-    M --> N[Predict TargetPrice using Saved RandomForest Model]
-    N --> O[estate_test_predictions.csv]
+    M --> N[Predict TargetPrice using Saved XGBoost Model]
+    N --> O[submission.csv]
 ```
 
 ### 2. Model Selection Justification
-*   **Ridge Regression:** Simple, fast, but restricted by linear boundaries.
-*   **Decision Tree:** Handles non-linear splits, but is highly prone to overfitting and has high variance.
-*   **Random Forest:** Averages many independent decision trees. By introducing randomness during tree splitting, it decouples error correlation across trees, yielding high stability, robust predictions, and superior generalization.
+*   **Linear Regression:** Baseline regression model, fast and simple but restricted to linear relationships.
+*   **Random Forest:** Averages many independent decision trees. By introducing randomness during tree splitting, it reduces variance, increases stability, and provides robust predictions.
+*   **XGBoost:** A powerful gradient boosted decision trees algorithm. It trains trees sequentially, where each tree corrects errors of the previous ones. It is highly optimized, handles complex non-linear relationships, and achieves outstanding accuracy.
 
 ---
 
@@ -96,12 +96,12 @@ The models were trained using 6-fold cross-validation on the training set and ev
 
 | Model | Tuning Hyperparameters | $R^2$ Score | Root Mean Squared Error (RMSE) | Mean Absolute Error (MAE) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Ridge Regression** | `alpha`: 1.0 | 0.6522 | 0.6693 | 0.4804 |
-| **Decision Tree** | `max_depth`: 10, `min_samples_leaf`: 2 | 0.7065 | 0.6148 | 0.4213 |
-| **Random Forest** | `n_estimators`: 200, `max_depth`: 12, `min_samples_leaf`: 2 | **0.7865** | **0.5244** | **0.3504** |
+| **Linear Regression** | None | 0.6521 | 0.6693 | 0.4805 |
+| **Random Forest** | `n_estimators`: 200, `max_depth`: 12, `min_samples_leaf`: 2 | 0.7854 | 0.5257 | 0.3522 |
+| **XGBoost** | `n_estimators`: 200, `max_depth`: 6, `learning_rate`: 0.1 | **0.8256** | **0.4739** | **0.3124** |
 
 ### 2. Web Application Setup
-*   **Backend (`app.py`):** Utilizes Flask. Loads serialized `preprocessor.joblib` and `random_forest_model.joblib` on startup. Serves `/predict` endpoint returning JSON predictions.
+*   **Backend (`app.py`):** Utilizes Flask. Loads serialized `preprocessor.joblib`, `linear_regression_model.joblib`, `xgboost_model.joblib`, and `random_forest_model.joblib` on startup. Serves `/predict` endpoint returning JSON predictions.
 *   **Frontend (`templates/index.html`):** Glassmorphic web panel with Outfit typography and dynamic dark mode sliders for all 10 features:
     *   *Direct sliders:* IncomeLevel, PropertyAge, TotalRooms, TotalBedrooms, AvgOccupancy, RoomsPerHousehold, BedroomsRatio.
     *   *Direct inputs:* NeighborhoodPop, Latitude, Longitude.
@@ -124,5 +124,5 @@ The models were trained using 6-fold cross-validation on the training set and ev
 *   **Geographical Constraints:** The model is bound to the coordinate boundaries of the training dataset. It cannot predict prices for properties outside these geographical boundaries.
 
 ### 4. Future Suggestions
-*   Use XGBoost or LightGBM for gradient boosting ensembles to improve the $R^2$ score beyond 0.82.
+*   We successfully implemented XGBoost and improved the $R^2$ score to **0.8256**. Future work could incorporate LightGBM to speed up training.
 *   Incorporate SHAP (Shapley Additive exPlanations) values to provide local feature contribution visualization in the web application UI.

@@ -16,8 +16,8 @@ def load_saved_models():
     
     # Load the preprocessor and models from the serialized joblib files
     preprocessor = joblib.load("Notebook/models/preprocessor.joblib")
-    models['Ridge Regression'] = joblib.load("Notebook/models/ridge_model.joblib")
-    models['Decision Tree'] = joblib.load("Notebook/models/decision_tree_model.joblib")
+    models['Linear Regression'] = joblib.load("Notebook/models/linear_regression_model.joblib")
+    models['XGBoost'] = joblib.load("Notebook/models/xgboost_model.joblib")
     models['Random Forest'] = joblib.load("Notebook/models/random_forest_model.joblib")
     
     print("All models loaded successfully!")
@@ -74,8 +74,8 @@ def predict():
         input_processed = preprocessor.transform(input_data)
         
         # Predict price using loaded model
-        model = models.get(model_name, models['Random Forest'])
-        predicted_val = model.predict(input_processed)[0]
+        model = models.get(model_name, models['XGBoost'])
+        predicted_val = float(model.predict(input_processed)[0])
         
         # Cap at 0 if negative predictions happen
         predicted_price = max(0.0, predicted_val)
