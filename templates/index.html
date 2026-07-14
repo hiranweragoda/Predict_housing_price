@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Price Predictor - Computational Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080c14;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: rgba(139, 92, 246, 0.3);
+            --neon-purple: #8b5cf6;
+            --neon-blue: #3b82f6;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, var(--primary-glow) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphism Panel styles */
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .label-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #d1d5db;
+        }
+
+        .value-badge {
+            background: rgba(139, 92, 246, 0.1);
+            color: #c084fc;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        /* Input Controls */
+        input[type="number"],
+        select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Custom Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-purple);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--neon-purple);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Predict Card */
+        .predict-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 3rem 0;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .result-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .price-display {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #10b981;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .price-value-raw {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Model comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comparison-table th {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .comparison-table td {
+            font-size: 0.9rem;
+        }
+
+        .recommended-badge {
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn-predict {
+            width: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            margin-top: 1.5rem;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        /* Custom warning message */
+        .ratio-warning {
+            color: #ef4444;
+            font-size: 0.75rem;
+            display: none;
+            margin-top: 0.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Left Panel: Input Form -->
+        <div class="panel">
+            <div class="header">
+                <h1>Real Estate Price Predictor</h1>
+                <p>Enter house attributes to predict the target price using regression models</p>
+            </div>
+
+            <form id="predictorForm" onsubmit="event.preventDefault(); getPrediction();">
+                <div class="form-grid">
+                    <!-- Income Level -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="IncomeLevel">Income Level</label>
+                            <span class="value-badge" id="IncomeLevelVal">3.8</span>
+                        </div>
+                        <input type="range" id="IncomeLevel" min="0.5" max="15.0" step="0.1" value="3.8"
+                            oninput="updateBadge('IncomeLevel', this.value);">
+                    </div>
+
+                    <!-- Property Age -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="PropertyAge">Property Age (Years)</label>
+                            <span class="value-badge" id="PropertyAgeVal">28</span>
+                        </div>
+                        <input type="range" id="PropertyAge" min="1" max="100" step="1" value="28"
+                            oninput="updateBadge('PropertyAge', this.value);">
+                    </div>
+
+                    <!-- Total Rooms -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="TotalRooms">Total Rooms</label>
+                            <span class="value-badge" id="TotalRoomsVal">5</span>
+                        </div>
+                        <input type="range" id="TotalRooms" min="1" max="20" step="1" value="5"
+                            oninput="updateBadge('TotalRooms', this.value); validateBedrooms();">
+                    </div>
+
+                    <!-- Total Bedrooms -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="TotalBedrooms">Total Bedrooms</label>
+                            <span class="value-badge" id="TotalBedroomsVal">1</span>
+                        </div>
+                        <input type="range" id="TotalBedrooms" min="1" max="10" step="1" value="1"
+                            oninput="updateBadge('TotalBedrooms', this.value); validateBedrooms();">
+                        <span class="ratio-warning" id="bedroomsWarning">Bedrooms ratio cannot exceed 1.0</span>
+                    </div>
+
+                    <!-- Neighborhood Population -->
+                    <div class="form-group">
+                        <label for="NeighborhoodPop">Neighborhood Population</label>
+                        <input type="number" id="NeighborhoodPop" value="1425">
+                    </div>
+
+                    <!-- Average Occupancy -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="AvgOccupancy">Average Occupancy</label>
+                            <span class="value-badge" id="AvgOccupancyVal">3.0</span>
+                        </div>
+                        <input type="range" id="AvgOccupancy" min="1.0" max="10.0" step="0.1" value="3.0"
+                            oninput="updateBadge('AvgOccupancy', this.value);">
+                    </div>
+
+                    <!-- Rooms Per Household -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="RoomsPerHousehold">Rooms Per Household</label>
+                            <span class="value-badge" id="RoomsPerHouseholdVal">2.0</span>
+                        </div>
+                        <input type="range" id="RoomsPerHousehold" min="1.0" max="10.0" step="0.1" value="2.0"
+                            oninput="updateBadge('RoomsPerHousehold', this.value);">
+                    </div>
+
+                    <!-- Bedrooms Ratio -->
+                    <div class="form-group">
+                        <div class="label-container">
+                            <label for="BedroomsRatio">Bedrooms Ratio</label>
+                            <span class="value-badge" id="BedroomsRatioVal">0.20</span>
+                        </div>
+                        <input type="range" id="BedroomsRatio" min="0.0" max="1.0" step="0.01" value="0.20"
+                            oninput="updateBadge('BedroomsRatio', this.value);">
+                    </div>
+
+                    <!-- Latitude -->
+                    <div class="form-group">
+                        <label for="Latitude">Latitude</label>
+                        <input type="number" id="Latitude" step="0.01" value="34.05">
+                    </div>
+
+                    <!-- Longitude -->
+                    <div class="form-group">
+                        <label for="Longitude">Longitude</label>
+                        <input type="number" id="Longitude" step="0.01" value="-118.24">
+                    </div>
+
+                    <!-- Predict Button -->
+                    <div class="form-group full-width" style="margin-top: 1.5rem;">
+                        <button type="submit" class="btn-predict">Predict House Price</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Panel: Prediction Output & Comparison -->
+        <div class="panel predict-card">
+            <div class="header">
+                <h1>Prediction Results</h1>
+                <p>Outputs updated dynamically based on slider values</p>
+            </div>
+
+            <div class="result-container">
+                <div class="result-label">Predicted Price</div>
+                <div class="price-display" id="predictedPrice">$0.00</div>
+                <div class="price-value-raw" id="predictedRaw">Target Value: 0.0000</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateBadge(id, value) {
+            document.getElementById(id + 'Val').innerText = value;
+        }
+
+        function validateBedrooms() {
+            const rooms = parseInt(document.getElementById('TotalRooms').value);
+            const bedroomsInput = document.getElementById('TotalBedrooms');
+            let bedrooms = parseInt(bedroomsInput.value);
+            const warning = document.getElementById('bedroomsWarning');
+
+            if (bedrooms > rooms) {
+                bedrooms = rooms;
+                bedroomsInput.value = rooms;
+                updateBadge('TotalBedrooms', rooms);
+                warning.style.display = 'block';
+                setTimeout(() => warning.style.display = 'none', 3000);
+            }
+        }
+
+        async function getPrediction() {
+            const data = {
+                model: 'Random Forest',
+                IncomeLevel: parseFloat(document.getElementById('IncomeLevel').value),
+                PropertyAge: parseFloat(document.getElementById('PropertyAge').value),
+                TotalRooms: parseFloat(document.getElementById('TotalRooms').value),
+                TotalBedrooms: parseFloat(document.getElementById('TotalBedrooms').value),
+                NeighborhoodPop: parseFloat(document.getElementById('NeighborhoodPop').value),
+                AvgOccupancy: parseFloat(document.getElementById('AvgOccupancy').value),
+                RoomsPerHousehold: parseFloat(document.getElementById('RoomsPerHousehold').value),
+                BedroomsRatio: parseFloat(document.getElementById('BedroomsRatio').value),
+                Latitude: parseFloat(document.getElementById('Latitude').value),
+                Longitude: parseFloat(document.getElementById('Longitude').value)
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update display with formatting
+                    document.getElementById('predictedPrice').innerText = result.formatted_price;
+                    document.getElementById('predictedRaw').innerText = "Target Value: " + result.predicted_price.toFixed(4);
+                } else {
+                    console.error(result.error);
+                }
+            } catch (err) {
+                console.error("Error fetching prediction: ", err);
+            }
+        }
+
+        // Run prediction once on page load
+        window.onload = getPrediction;
+    </script>
+</body>
+
+</html>
