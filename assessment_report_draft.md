@@ -62,53 +62,40 @@ For the task of real estate valuation, traditional symbolic systems are highly d
 *   Zadeh, L.A., 1965. Fuzzy sets. *Information and Control*, 8(3), pp.338-353.
 
 ---
-
 ## Section B: Literature Review (20 Marks)
 
 ### 1. Introduction to Real Estate Valuation Modeling
-Real estate price forecasting constitutes a fundamental problem in computational economics and spatial analysis. The market value of residential properties is determined by a complex, heterogeneous mixture of physical characteristics (e.g., number of rooms, bedrooms, and structural age), demographic parameters (e.g., neighborhood population and median income), and geographical coordinates (latitude and longitude) representing spatial attributes (Limsombunchao 2004). Historically, real estate mass appraisal has transitioned from rigid, parametric econometric models to flexible, data-driven Computational Intelligence (CI) algorithms. This literature review evaluates the historical development, methodological frameworks, strengths, and constraints of three dominant paradigms in valuation modeling: Hedonic Pricing Models (HPM), Tree-Based Ensemble methods (Random Forest and GBDT/XGBoost), and Deep Learning architectures.
+Real estate valuation represents a complex spatial and econometric forecasting problem. Residential property values are determined by structural attributes (rooms, age), local demographics (population, income), and environmental factors represented by location coordinates (Limsombunchao 2004). Mass appraisal modeling has evolved from traditional parametric econometric methods to advanced non-parametric machine learning. This literature review evaluates three dominant paradigms: Hedonic Pricing Models (HPM), Tree-Based Ensemble methods (Random Forest and XGBoost), and Deep Learning neural architectures.
 
 ---
 
 ### 2. Hedonic Price Modeling (Parametric Econometric Approaches)
-The theoretical foundation of modern real estate valuation originates from Rosen’s (1974) Hedonic Pricing Model (HPM). Rosen posited that goods are valued for their utility-bearing characteristics rather than the good itself. Consequently, the transaction price of a house can be modeled as a function of its individual structural, neighborhood, and environmental attributes:
+The theoretical framework of modern appraisal originates from Rosen’s (1974) Hedonic Pricing Model (HPM), which posits that goods are valued for their utility-bearing characteristics rather than the good itself. Consequently, property value is modeled as a combination of structural, neighborhood, and environmental attributes:
 
 $$P = f(S, N, E) + \epsilon$$
 
-Where $S$ represents structural features, $N$ represents neighborhood demographics, $E$ represents environmental/geographical indicators, and $\epsilon$ is the random error term.
-
-Traditionally, HPM is estimated using parametric techniques such as Ordinary Least Squares (OLS) linear regression, Ridge regression, or Lasso regression (Malpezzi 2003). 
-*   **Strengths:** The primary advantage of parametric HPM lies in its statistical transparency and interpretability. OLS regression outputs explicit coefficients (beta weights) for each characteristic, enabling economists and appraisers to measure the marginal contribution of individual features (e.g., the exact dollar value increase associated with adding a bedroom) and perform hypothesis testing via t-statistics.
-*   **Limitations and Critique:** Despite its widespread historical adoption, parametric HPM is severely restricted by several theoretical assumptions. OLS assumes that the relationship between property attributes and price is strictly linear or log-linear, which fails to capture complex non-linear dynamics such as the accelerated depreciation of very old properties or diminishing returns on total rooms (Basu and Thibodeau 1998). Furthermore, OLS is highly susceptible to **multicollinearity** (e.g., the high correlation between the number of rooms and bedrooms) and **spatial autocorrelation**, where property values are geographically clustered, violating the assumption of independent and identically distributed (i.i.d.) error terms (Fotheringham, Brunsdon and Charlton 2002).
+Traditionally, HPM is estimated using parametric Ordinary Least Squares (OLS) linear regression (Malpezzi 2003). While HPM offers high interpretability and explicit coefficients, it exhibits major limitations. OLS assumes strict linear relationships, failing to capture complex non-linear dynamics such as structural age depreciation curves (Basu and Thibodeau 1998). Furthermore, OLS is highly vulnerable to multicollinearity (e.g., total rooms vs. bedrooms) and spatial autocorrelation, violating independent error assumptions (Fotheringham, Brunsdon and Charlton 2002).
 
 ---
 
 ### 3. Non-Parametric Machine Learning & Tree-Based Ensembles
-To address the limitations of parametric linearity, researchers have increasingly adopted non-parametric machine learning models. Unlike HPM, non-parametric algorithms do not assume a predefined mathematical form for the target function, allowing them to learn arbitrary decision boundaries directly from empirical data.
+Non-parametric machine learning models resolve linear constraints by learning decision boundaries directly from empirical data.
 
 #### **Random Forest Regressors (Bagging)**
-Introduced by Breiman (2001), the Random Forest (RF) algorithm is an ensemble method that constructs a multitude of decision trees during training. To output a prediction, RF averages the outputs of individual trees (bootstrap aggregation, or bagging), while injecting randomness by selecting a random subset of features at each split.
-*   **Synthesis of Literature:** In comparative studies of mass appraisal, Random Forest consistently outperforms linear OLS. Antipov and Pokryshevskaya (2012) demonstrated that RF handles spatial interactions and multicollinearity natively without requiring complex variable transformations. Furthermore, because it averages predictions across hundreds of independent trees, RF exhibits high robustness against overfitting and is insensitive to outliers—a common occurrence in housing datasets containing luxury estates or distressed properties.
+Breiman (2001) introduced Random Forest (RF), an ensemble method that grows parallel decision trees on bootstrapped data subsets and averages their predictions. In property valuation, Antipov and Pokryshevskaya (2012) demonstrated that RF models spatial interactions and multicollinearity natively. By averaging predictions across trees, RF is highly robust to overfitting and insensitive to outliers.
 
 #### **Gradient Boosting and XGBoost (Boosting)**
-While Random Forest grows trees in parallel, Gradient Boosting Decision Trees (GBDT) build trees sequentially. Each new tree is trained to predict the residuals (errors) of the preceding trees, using gradient descent optimization to minimize a loss function (Friedman 2001). Chen and Guestrin (2016) optimized this paradigm by introducing **XGBoost (Extreme Gradient Boosting)**, which incorporates a regularized objective function to control model complexity and prevent overfitting, alongside parallelized tree construction.
-*   **Synthesis of Literature:** GBDT and XGBoost have emerged as the state-of-the-art for tabular regression tasks. Mullainathan and Spiess (2017) highlighted that boosting algorithms excel at mapping complex coordinate interactions (Latitude and Longitude) to local neighborhood values, representing a significant improvement over traditional dummy variables for submarkets. The algorithm's built-in handling of missing values and computational efficiency make it highly suitable for production-level API deployment.
+Gradient Boosting builds trees sequentially, with each new tree trained to minimize residual errors of the preceding trees (Friedman 2001). Chen and Guestrin (2016) optimized this via XGBoost, introducing regularization to control overfitting. In real estate, XGBoost excels at mapping coordinate thresholds (Latitude/Longitude) to local house prices, outperforming traditional spatial regressions (Mullainathan and Spiess 2017).
 
 ---
 
-### 4. Artificial Neural Networks (Connectionist Systems / Deep Learning)
-Artificial Neural Networks (ANNs), particularly Multi-Layer Perceptrons (MLPs), represent another prominent non-parametric paradigm. Drawing inspiration from biological neural pathways, ANNs pass input features through multiple hidden layers of interconnected nodes where non-linear activation functions (e.g., ReLU) are applied (Hornik, Stinchcombe and White 1989).
-
-*   **Synthesis of Literature:** In real estate forecasting, ANNs act as universal function approximators capable of modeling extremely intricate, high-dimensional interactions. Limsombunchao (2004) compared OLS and ANNs on housing datasets and concluded that the connectionist approach achieves lower Root Mean Squared Error (RMSE) due to its ability to model complex structural-spatial interactions.
-*   **Limitations and Critique:** However, deep learning models present significant drawbacks when applied to tabular datasets of moderate size (e.g., under 50,000 observations). Grinsztajn, Oyallon and Varoquaux (2022) conducted extensive benchmarks comparing deep learning architectures to tree ensembles on tabular data, finding that tree-based models (like XGBoost and Random Forest) consistently outperform ANNs. Neural networks are highly sensitive to hyperparameter choices, require extensive data normalization, are computationally expensive to train, and suffer from a complete lack of interpretability (the "black box" problem), making them less practical for real estate markets where transparency is legally or socially required.
+### 4. Artificial Neural Networks (Connectionist Systems)
+Artificial Neural Networks (ANNs) serve as universal function approximators, modeling high-dimensional non-linear patterns (Hornik, Stinchcombe and White 1989). While ANNs handle complex spatial correlations well, they present drawbacks on tabular datasets. Grinsztajn, Oyallon and Varoquaux (2022) proved that tree ensembles consistently outperform deep learning on tabular data. ANNs require extensive normalization, are highly sensitive to hyperparameters, and function as "black boxes," making them less practical for real estate applications requiring transparency.
 
 ---
 
-### 5. Summary and Synthesis of Model Selection
-Based on the literature review, the model selections for this project are justified as follows:
-1.  **Linear Regression** serves as the essential parametric baseline, representing traditional econometric appraisal (HPM) to highlight the performance gains of non-parametric approaches.
-2.  **Random Forest** is selected as a robust bagging ensemble to handle structural multicollinearity and outlier variance.
-3.  **XGBoost** represents the state-of-the-art regularized boosting paradigm, selected for its superior predictive performance on tabular coordinate and demographic data.
+### 5. Summary of Model Selection
+To balance interpretability and accuracy, this project utilizes Linear Regression as a baseline econometric representation, Random Forest to handle multicollinearity/outliers, and XGBoost as the state-of-the-art GBDT predictor for coordinate and demographic inputs.
 
 ---
 
@@ -116,7 +103,7 @@ Based on the literature review, the model selections for this project are justif
 *   Antipov, E.A. and Pokryshevskaya, E.B., 2012. Mass appraisal of residential apartments: An application of Random Forest. *International Journal of Housing Markets and Analysis*, 5(2), pp.126-139.
 *   Basu, S. and Thibodeau, T.G., 1998. Analysis of spatial autocorrelation in house prices. *The Journal of Real Estate Finance and Economics*, 17(1), pp.61-85.
 *   Breiman, L., 2001. Random forests. *Machine Learning*, 45(1), pp.5-32.
-*   Chen, T. and Guestrin, C., 2016. Xgboost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, pp.785-794.
+*   Chen, T. and Guestrin, C., 2016. Xgboost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining*, pp.785-794.
 *   Fotheringham, A.S., Brunsdon, C. and Charlton, M., 2002. *Geographically weighted regression: the analysis of spatially varying relationships*. John Wiley & Sons.
 *   Friedman, J.H., 2001. Greedy function approximation: a gradient boosting machine. *Annals of Statistics*, pp.1189-1232.
 *   Grinsztajn, L., Oyallon, E. and Varoquaux, G., 2022. Why do tree-based models still outperform deep learning on tabular data? *Advances in Neural Information Processing Systems*, 35, pp.507-520.
@@ -125,7 +112,6 @@ Based on the literature review, the model selections for this project are justif
 *   Malpezzi, S., 2003. Hedonic pricing models: a selective and applied review. *Housing Economics and Public Policy*, pp.67-89.
 *   Mullainathan, S. and Spiess, J., 2017. Machine learning: an applied econometric approach. *Journal of Economic Perspectives*, 31(2), pp.87-106.
 *   Rosen, S., 1974. Hedonic prices and implicit markets: product differentiation in pure competition. *Journal of Political Economy*, 82(1), pp.34-55.
-
 ---
 
 ## Section C: Exploratory Data Analysis (EDA) and Model Influence (10 Marks)
