@@ -144,7 +144,7 @@ Because of this boundary limit and skewness, standard linear regressions are pro
 ---
 
 ### 3.2 Numerical Feature Distributions
-The distributions of numerical features were examined using histograms with KDE overlays to identify skewness, outliers, and general trends (see Figure 1).
+The distributions of numerical features were examined using Kernel Density Estimate (KDE) plot curves to identify skewness, outliers, and general trends (see Figure 1).
 
 ![Figure 1: Numeric Feature Distributions](images/outliers_distribution.png)
 
