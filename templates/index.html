@@ -484,7 +484,10 @@
             }
         }
 
-        // Do not auto-predict on page load, start with $0.00 as requested
+        // Reset form inputs to default values on page load
+        window.onload = function() {
+            document.getElementById('predictorForm').reset();
+        };
     </script>
 </body>
 
