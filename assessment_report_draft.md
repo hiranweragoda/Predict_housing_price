@@ -190,9 +190,47 @@ In general, the exploratory data analysis offered a solid basis for feature engi
 
 ---
 
-## Section D: System Architecture (10 Marks)
+## Section D: System Architecture and Machine Learning Techniques (10 Marks)
 
-### 1. Processing Pipeline
+This section explains the overall system architecture and the machine learning methods used to create the real estate price prediction system. The solution combines data cleaning, preprocessing, model training, evaluation, and web deployment into a single, cohesive pipeline. This approach guarantees reliability, consistency, and practical utility.
+
+---
+
+### 4.1 Overall System Architecture
+The system utilizes a modular, end-to-end machine learning design with four key layers:
+
+#### 4.1.1 Data Layer
+*   **Input Data:** The input dataset is composed of housing data containing structural characteristics (e.g., total rooms, bedrooms, property age), local demographics (e.g., population, average occupancy), and geographical coordinate coordinates (latitude, longitude).
+*   **Data Partitioning:** The dataset is split into an 80/20 ratio for training and testing to facilitate independent model validation and prevent data leakage.
+
+#### 4.1.2 Processing and Feature Engineering Layer
+*   **Numerical Scaling:** Standard scaling is applied to numeric inputs to prevent features with large ranges (e.g., population) from dominating distance-based calculations or slowing gradient convergence.
+*   **Categorical Encoding:** Discretized age brackets (`PropertyAge_bins`) are mapped using ordinal encoding to translate categorical labels into numeric representations readable by the models.
+*   **Derived Features:** Engineered metrics such as `BedroomsRatio` and `RoomsPerHousehold` are created to capture the internal space structure of properties, addressing raw column multicollinearity.
+*   **Pipeline Consistency:** A unified preprocessing pipeline ensures that feature transformations remain identical during training, testing, and production deployment.
+
+#### 4.1.3 Modeling Layer
+*   **Model Comparison:** Multiple supervised regression models are trained and benchmarked.
+*   **Non-Parametric Focus:** Tree-based ensembles (Random Forest and XGBoost) are prioritized due to their ability to capture complex non-linear spatial interactions and outlier robustness.
+*   **Selection Metric:** Model selection depends on cross-validated $R^2$ scores, Root Mean Squared Error (RMSE), and Mean Absolute Error (MAE).
+
+#### 4.1.4 Application Layer (Deployment)
+*   **Model Serialization:** The fitted preprocessor and best-performing estimators are serialized and saved using `joblib`.
+*   **Flask Backend:** A web server loads the serialized components, exposes a prediction API (`/predict`), and serves the interactive frontend interface.
+*   **Interactive Interface:** A responsive webpage allows users to input property attributes and receive real-time, boundary-safe predicted house prices.
+
+---
+
+### 4.2 Machine Learning Problem Formulation
+The task is framed as a continuous regression problem, aiming to predict the monetary value of a residential property:
+*   **Target Variable:** `TargetPrice` (representing the house value scaled by $100,000, where a value of 2.0000 denotes a price of $200,000).
+*   **Evaluation Focus:** Because this is a continuous prediction task (regression) rather than classification, probability-based metrics like ROC AUC are not applicable. Instead, model performance is evaluated using $R^2$ Score (goodness of fit), RMSE (error magnitude with penalty for large errors), and MAE (average absolute prediction error).
+
+---
+
+### 4.3 Preprocessing and Feature Handling
+To prepare the dataset for model training and maintain consistency across deployment, the preprocessing steps are integrated into a single pipeline (see Figure 5):
+
 ```mermaid
 graph TD
     A[estate_train.csv / Raw Data] --> B[Data Cleaning: Drop ID, Drop PropertyAge NaNs]
@@ -210,10 +248,37 @@ graph TD
     N --> O[submission.csv]
 ```
 
-### 2. Model Selection Justification
-*   **Linear Regression:** Baseline regression model, fast and simple but restricted to linear relationships.
-*   **Random Forest:** Averages many independent decision trees. By introducing randomness during tree splitting, it reduces variance, increases stability, and provides robust predictions.
-*   **XGBoost:** A powerful gradient boosted decision trees algorithm. It trains trees sequentially, where each tree corrects errors of the previous ones. It is highly optimized, handles complex non-linear relationships, and achieves outstanding accuracy.
+**Figure 5: Data Preprocessing and Workflow Pipeline**
+
+*   **Numerical Features:** Standardized using `StandardScaler` to center features around zero with unit variance, helping the linear baseline model converge rapidly.
+*   **Categorical Features:** Ordinally encoded to represent 'New', 'Moderate', and 'Old' groups as ordered numeric values, preserving the temporal hierarchy.
+*   **Pipeline Integration:** Preprocessing and regression models are encapsulated within a scikit-learn `Pipeline` and `ColumnTransformer`. This completely prevents data leakage during cross-validation and ensures that production inference inputs are transformed in the exact same manner as training vectors.
+
+---
+
+### 4.4 Model Selection and Training
+Several machine learning models were trained and evaluated to identify the optimal predictor for real estate mass appraisal:
+*   **Linear Regression:** Serves as the baseline parametric model. It is mathematically transparent and fast but fails to capture non-linear depreciation and geographic coordinate interactions.
+*   **Random Forest Regressor:** An ensemble bagging method that trains multiple independent decision trees in parallel. It averages predictions to reduce variance and provides strong resistance to data noise and outliers.
+*   **XGBoost Regressor:** An advanced gradient boosting algorithm that builds trees sequentially to correct the residuals of preceding estimators. It incorporates L1/L2 regularization to control model complexity, handles tabular interactions exceptionally well, and achieves the highest overall accuracy.
+
+---
+
+### 4.5 Model Evaluation Strategy
+To ensure generalizability and prevent overfitting, the following validation framework was executed:
+*   **Data Splitting:** An 80/20 train-test split was used for testing final generalized models.
+*   **Cross-Validation:** A 6-fold cross-validation was implemented during hyperparameter tuning to ensure stable evaluations across different subsets of data.
+*   **Clipping Bounds:** During deployment, a lower bound threshold of $0.0$ was applied to ensure the system never yields negative or mathematically impossible house prices.
+
+---
+
+### 4.6 Model Deployment and Web Application Integration
+The trained XGBoost model, baseline linear model, Random Forest model, and the preprocessing pipeline were saved and deployed in a Flask-based web application. This integration allows users to:
+*   **Input House Attributes:** Enter property dimensions, occupants, coordinates, and age via responsive sliders and number input fields.
+*   **Calculate Features:** Automatically derive feature columns (`BedroomsRatio`, `RoomsPerHousehold`, and age categories) in the backend.
+*   **Receive Real-Time Predictions:** Instantaneous price estimations are generated by passing user values through the loaded preprocessor and XGBoost model.
+
+The deployment demonstrates the practical application of the developed predictive models beyond offline Jupyter notebooks, creating a real-world software tool.
 
 ---
 
