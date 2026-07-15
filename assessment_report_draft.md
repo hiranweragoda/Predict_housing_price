@@ -143,21 +143,23 @@ Because of this boundary limit and skewness, standard linear regressions are pro
 
 ---
 
-### 3.2 Numerical Feature Distributions
-The distributions of numerical features were examined using Kernel Density Estimate (KDE) plot curves to identify skewness, outliers, and general trends (see Figure 1).
+### 3.2 Numerical Feature Distributions and Outlier Diagnostics
+The distributions of numerical features were examined using Kernel Density Estimate (KDE) plot curves to identify skewness and general trends (see Figure 1). To identify specific outlier points and statistical boundaries, boxplots were compiled for all numerical attributes (see Figure 2).
 
 ![Figure 1: Numeric Feature Distributions](images/outliers_distribution.png)
 
-Applicant area income (`IncomeLevel`) showed a right-skewed distribution, indicating that most property neighborhoods belong to middle-income classes, while a few represent high-income districts. Average occupancy (`AvgOccupancy`) and rooms per household (`RoomsPerHousehold`) exhibited extreme right-skewed distributions with heavy outlier tails (e.g., maximum occupancy values reaching 1,243 and rooms exceeding 50 per household). 
+![Figure 2: Numeric Feature Outliers](images/outliers_boxplots.png)
 
-Geographical coordinates (`Latitude` and `Longitude`) displayed multi-modal spatial distributions, representing major population and housing clusters (e.g., coastal and metropolitan hubs). Because of these spatial and skewed patterns, standard linear scaling would be heavily distorted by extreme outliers. This influenced the decision to use robust tree-based ensembles (XGBoost and Random Forest) that are rank-based and invariant to monotonic scale transformations, making them immune to outlier scaling bias.
+Applicant area income (`IncomeLevel`) showed a right-skewed distribution, indicating that most property neighborhoods belong to middle-income classes, while a few represent high-income districts. As illustrated in the boxplots (Figure 2), average occupancy (`AvgOccupancy`) and rooms per household (`RoomsPerHousehold`) exhibit extreme right-skewed distributions with heavy outlier tails, including extreme single-value spikes (e.g., maximum occupancy values reaching 1,243 and rooms exceeding 50 per household).
+
+Geographical coordinates (`Latitude` and `Longitude`) displayed multi-modal spatial distributions, representing major population and housing clusters (e.g., coastal and metropolitan hubs) with no outlier points. Because of these spatial and skewed patterns, standard linear scaling would be heavily distorted by extreme outliers. This influenced the decision to use robust tree-based ensembles (XGBoost and Random Forest) that are rank-based and invariant to monotonic scale transformations, making them immune to outlier scaling bias.
 
 ---
 
 ### 3.3 Categorical and Engineered Feature Analysis
-To capture the non-linear depreciation of housing values over time, the numerical feature `PropertyAge` was engineered into a categorical feature (`PropertyAge_bins`) using structural age brackets: 'New' ($\le 15$ years), 'Moderate' ($16-35$ years), and 'Old' ($>35$ years) (see Figure 2).
+To capture the non-linear depreciation of housing values over time, the numerical feature `PropertyAge` was engineered into a categorical feature (`PropertyAge_bins`) using structural age brackets: 'New' ($\le 15$ years), 'Moderate' ($16-35$ years), and 'Old' ($>35$ years) (see Figure 3).
 
-![Figure 2: Housing Price Distribution by Property Age Group](images/property_age_price.png)
+![Figure 3: Housing Price Distribution by Property Age Group](images/property_age_price.png)
 
 To mathematically prove that these binned age groups represent statistically distinct house prices, we conducted formal hypothesis testing:
 *   **ANOVA F-Test:** A one-way Analysis of Variance (ANOVA) test across the three age categories resulted in a highly significant **F-statistic of 113.82** and a **p-value of 0.0000** ($p < 0.05$). This statistically confirms that the mean housing prices among 'New', 'Moderate', and 'Old' properties are significantly different.
@@ -168,9 +170,9 @@ This statistical validation justified our encoding strategy (Ordinal Encoding) i
 ---
 
 ### 3.4 Correlation Analysis
-A correlation heatmap was created to look at linear relationships between numerical features and the target variable (see Figure 3).
+A correlation heatmap was created to look at linear relationships between numerical features and the target variable (see Figure 4).
 
-![Figure 3: Correlation Heat Map](images/correlation_heatmap.png)
+![Figure 4: Correlation Heat Map](images/correlation_heatmap.png)
 
 A strong positive correlation was found between `TotalRooms` and `TotalBedrooms` (correlation coefficient ≈ 0.85). In linear models, this causes severe multicollinearity, inflating the variance of regression coefficients and rendering the model unstable. To balance this, we engineered `BedroomsRatio` ($r \approx -0.26$).
 
