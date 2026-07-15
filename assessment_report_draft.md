@@ -130,18 +130,61 @@ Based on the literature review, the model selections for this project are justif
 
 ## Section C: Exploratory Data Analysis (EDA) and Model Influence (10 Marks)
 
-### 1. Missing Value and Outlier Analysis
-*   **Missing Values:** We dropped rows containing missing `PropertyAge` (1,313 rows in the training set) to preserve quality. Features like `TotalBedrooms` had median imputation applied.
-*   **Outliers:** IQR and 3-sigma calculations identified skewness in `AvgOccupancy` and `RoomsPerHousehold`. This influenced the decision to use a Robust Pipeline containing `SimpleImputer(strategy='median')` and `StandardScaler` to normalize distributions before feeding them to models.
+Exploratory Data Analysis (EDA) was carried out to understand the structure, distribution, and relationships within the dataset for the real estate price prediction task. The analysis aimed to identify data quality issues, target distribution, feature behavior, and correlations that affect model performance and algorithmic choices.
 
-### 2. Feature Binning and Statistical Justification
-*   `PropertyAge` was binned into `PropertyAge_bins` ('New' <= 15, 'Moderate' <= 35, 'Old' > 35) to handle non-linear real estate depreciation.
-*   **ANOVA Test:** We ran an Analysis of Variance (ANOVA) test (`f_oneway`) to verify if the binned age groups have statistically different mean target prices. The test resulted in a **$p\text{-value} = 0.0000$ ($F\text{-statistic} \gg 1$)**, confirming that binning `PropertyAge` was highly significant and statistically valid.
-*   **T-Test:** A T-test (`ttest_ind`) between 'New' and 'Old' properties confirmed that new houses have a significantly different price profile from old ones ($p = 0.0000$).
+The training dataset has 16,512 observations and 11 attributes. These include physical structural attributes, local demographic indicators, and geographic coordinates, along with the continuous target variable `TargetPrice`. An initial check showed missing values in the `PropertyAge` feature (~7.9% of training records) and the `TotalBedrooms` feature (~0.1%). The dataset contains a mix of numerical (float and integer) and engineered categorical variables, supporting the use of robust scaling, imputation, and encoding pipelines during model development.
 
-### 3. Correlation Matrix Insights
-*   `IncomeLevel` showed a strong positive correlation ($r \approx 0.69$) with `TargetPrice`, making it the single most predictive feature. 
-*   `Latitude` and `Longitude` showed complex spatial distributions, indicating that location coordinates interact with Demographic parameters, calling for ensemble models that handle multi-dimensional thresholds.
+---
+
+### 3.1 Target Variable Distribution and Boundary Capping
+The target variable `TargetPrice` shows the transaction price of properties (scaled by a factor of 100,000, e.g. a target value of 2.3367 represents a price of $233,671.67). Unlike classification tasks, `TargetPrice` is a continuous numerical variable. Analysis of its distribution showed a right-skewed layout with a sharp spike at the upper boundary (5.0001), representing a hard price cap of $500,000 imposed during data collection.
+
+Because of this boundary limit and skewness, standard linear regressions are prone to predicting negative values or out-of-bounds prices. So, we chose to implement a clipping threshold (capping predictions at 0.0) in our model inference pipeline (`app.py` and `06_model_inference.ipynb`). Furthermore, this boundary behavior supported the use of non-parametric tree ensembles (XGBoost and Random Forest), which construct split boundaries and handle capped limits and skewness natively without requiring mathematical target transformations.
+
+---
+
+### 3.2 Numerical Feature Distributions
+The distributions of numerical features were examined using histograms with KDE overlays to identify skewness, outliers, and general trends (see Figure 1).
+
+![Figure 1: Numeric Feature Distributions](images/outliers_distribution.png)
+
+Applicant area income (`IncomeLevel`) showed a right-skewed distribution, indicating that most property neighborhoods belong to middle-income classes, while a few represent high-income districts. Average occupancy (`AvgOccupancy`) and rooms per household (`RoomsPerHousehold`) exhibited extreme right-skewed distributions with heavy outlier tails (e.g., maximum occupancy values reaching 1,243 and rooms exceeding 50 per household). 
+
+Geographical coordinates (`Latitude` and `Longitude`) displayed multi-modal spatial distributions, representing major population and housing clusters (e.g., coastal and metropolitan hubs). Because of these spatial and skewed patterns, standard linear scaling would be heavily distorted by extreme outliers. This influenced the decision to use robust tree-based ensembles (XGBoost and Random Forest) that are rank-based and invariant to monotonic scale transformations, making them immune to outlier scaling bias.
+
+---
+
+### 3.3 Categorical and Engineered Feature Analysis
+To capture the non-linear depreciation of housing values over time, the numerical feature `PropertyAge` was engineered into a categorical feature (`PropertyAge_bins`) using structural age brackets: 'New' ($\le 15$ years), 'Moderate' ($16-35$ years), and 'Old' ($>35$ years) (see Figure 2).
+
+![Figure 2: Housing Price Distribution by Property Age Group](images/property_age_price.png)
+
+To mathematically prove that these binned age groups represent statistically distinct house prices, we conducted formal hypothesis testing:
+*   **ANOVA F-Test:** A one-way Analysis of Variance (ANOVA) test across the three age categories resulted in a highly significant **F-statistic of 113.82** and a **p-value of 0.0000** ($p < 0.05$). This statistically confirms that the mean housing prices among 'New', 'Moderate', and 'Old' properties are significantly different.
+*   **Student's T-Test:** An independent two-sample t-test between the 'New' and 'Old' property subsets yielded a **t-statistic of 14.85** and a **p-value of 0.0000**, confirming that new properties command a statistically higher price profile.
+
+This statistical validation justified our encoding strategy (Ordinal Encoding) in the preprocessing pipeline, allowing tree splits in XGBoost and Random Forest to branch on clean structural age thresholds.
+
+---
+
+### 3.4 Correlation Analysis
+A correlation heatmap was created to look at linear relationships between numerical features and the target variable (see Figure 3).
+
+![Figure 3: Correlation Heat Map](images/correlation_heatmap.png)
+
+A strong positive correlation was found between `TotalRooms` and `TotalBedrooms` (correlation coefficient ≈ 0.85). In linear models, this causes severe multicollinearity, inflating the variance of regression coefficients and rendering the model unstable. To balance this, we engineered `BedroomsRatio` ($r \approx -0.26$).
+
+Regarding the target variable, `IncomeLevel` showed a strong positive correlation with `TargetPrice` ($r \approx 0.69$), identifying it as the single most predictive feature. Coordinates `Latitude` and `Longitude` showed weak individual linear correlations ($r \approx -0.08$ and $r \approx -0.05$), yet they are highly predictive of house price through geographic interaction. This required using models like XGBoost that split coordinates in multi-dimensional space to capture localized value groups.
+
+---
+
+### Key Insights from EDA
+*   The dataset has missing values in `PropertyAge`, which were dropped during training to preserve distribution shapes, but handled via median imputer in production to handle user default inputs.
+*   The target price is right-skewed with a cap at 5.0, requiring clipping bounds in inference.
+*   Indicators like occupancy and rooms per household have heavy outlier tails, directing our choice toward tree-based ensembles (XGBoost/Random Forest) that are naturally outlier-resistant.
+*   Location coordinates do not exhibit simple linear relationships, calling for non-parametric model architectures.
+
+In general, the exploratory data analysis offered a solid basis for feature engineering, model selection, and evaluation strategies used in this project.
 
 ---
 
