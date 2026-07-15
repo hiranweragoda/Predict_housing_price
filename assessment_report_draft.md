@@ -60,37 +60,72 @@ For the task of real estate valuation, traditional symbolic systems are highly d
 *   Rumelhart, D.E., Hinton, G.E. and Williams, R.J., 1986. Learning representations by back-propagating errors. *Nature*, 323(6088), pp.533-536.
 *   Russell, S. and Norvig, P., 2020. *Artificial intelligence: a modern approach*. 4th ed. Pearson.
 *   Zadeh, L.A., 1965. Fuzzy sets. *Information and Control*, 8(3), pp.338-353.
+
 ---
 
 ## Section B: Literature Review (20 Marks)
 
-The use of machine learning and deep learning in real estate decision-making, especially in property valuation and housing price prediction, has received a lot of attention in recent years. Traditional mass appraisal relied on statistical models and expert-defined rules (such as simple price-per-square-foot metrics), which often lacked flexibility and struggled to recognize complex relationships among geographic and structural attributes. As large real estate datasets and powerful computing resources became available, machine learning and deep learning methods have increasingly taken the place of conventional methods, providing better predictive accuracy and reliability.
-
-Early research in house price prediction used classical machine learning algorithms like linear regression and decision trees. Linear regression has been popular in hedonic property pricing because it is easy to interpret and simple to use. However, some studies have noted its limitations in managing non-linear feature interactions and high-dimensional spatial data (Lessmann, 2015). Decision tree models improved this by capturing non-linear relationships but were prone to overfitting when used alone.
-
-Ensemble learning methods, especially Random Forests and Gradient Boosting Machines, represented a significant leap in real estate valuation modeling. Random Forest regressors combine predictions from multiple decision trees, which helps reduce variance and improve overall performance. Breiman’s research (2001) showed that these ensemble methods consistently outperform single regressors in structured tabular datasets (Breiman, 2001). Later studies in property price prediction confirmed that Random Forest models perform well when handling mixed numerical and categorical features, as well as spatial distributions often seen in housing datasets (Tianqi Chen, 2016).
-
-Support Vector Machines (SVMs) have also been investigated for property valuation and price prediction. Their strength lies in their ability to map features to high-dimensional spaces using kernel functions to create optimal regression fits. However, SVMs require careful selection of kernels and tuning of hyperparameters, and their scalability is often limited when working with large datasets. As a result, while SVMs show good performance in controlled experimental settings, they are less frequently used in large-scale production compared to ensemble or neural-based models.
-
-The rise of deep learning shifted predictive modeling by allowing systems to automatically learn hierarchical feature representations. Artificial Neural Networks (ANNs) are widely used in financial forecasting and real estate valuation because they can model complex non-linear relationships. Goodfellow, Bengio, and Courville (2016) pointed out that deep neural networks reduce the need for extensive manual feature engineering, which is particularly useful in areas with diverse data types. In real estate pricing, neural networks have demonstrated stronger predictive power when enough data is available, especially in understanding subtle interactions among structural, demographic, and geographical variables (Ian Goodfellow, 2016).
-
-LeCun, Bengio, and Hinton (2015) noted that deep learning excels when patterns are highly non-linear and spread across multiple features—conditions that fit well with housing and coordinate datasets. Recent studies have applied multilayer perceptrons (MLPs) to house valuation tasks, showing competitive or even better performance compared to traditional machine learning models, especially when paired with effective preprocessing and regularization. However, deep learning models often lack interpretability, which is a significant issue in regulated real estate valuation areas where explanations for property tax or loan approval are required (Yann LeCun, 2015).
-
-Several comparative studies have looked at different machine learning architectures within one framework to find the best approaches for housing price prediction. For instance, Lessmann et al. (2015) conducted a large benchmark analysis and concluded that ensemble and neural-based models outperform linear classifiers and regressors across various datasets. These results support using hybrid evaluation strategies, where classical models serve as baselines while more complex models are tested for performance improvements (Lessmann, 2015).
-
-In Kaggle housing prediction competitions, similar methods can be seen. Participants often use a mix of linear regression, Random Forests, gradient boosting, and neural networks to achieve a good balance between interpretability, accuracy, and generalization. The "Real Estate Price Prediction" competition follows this trend, encouraging experimentation with both classical and deep learning methods. The evaluation metric, R-squared (R²), stresses the importance of variance-based prediction accuracy over binary outputs, which aligns with best practices in real estate appraisal modeling.
-
-In summary, the literature clearly shows that while traditional machine learning techniques are valuable for baseline modeling and interpretability, ensemble and deep learning methods provide better performance in complex real-world real estate datasets. Combining neural networks or gradient boosting with classical models creates a solid evaluation framework, allowing informed model selection based on actual performance rather than theoretical assumptions alone. This project builds on these research findings by implementing, comparing, and deploying multiple learning techniques in a real-world Kaggle competition scenario.
+### 1. Introduction to Real Estate Valuation Modeling
+Real estate price forecasting constitutes a fundamental problem in computational economics and spatial analysis. The market value of residential properties is determined by a complex, heterogeneous mixture of physical characteristics (e.g., number of rooms, bedrooms, and structural age), demographic parameters (e.g., neighborhood population and median income), and geographical coordinates (latitude and longitude) representing spatial attributes (Limsombunchao 2004). Historically, real estate mass appraisal has transitioned from rigid, parametric econometric models to flexible, data-driven Computational Intelligence (CI) algorithms. This literature review evaluates the historical development, methodological frameworks, strengths, and constraints of three dominant paradigms in valuation modeling: Hedonic Pricing Models (HPM), Tree-Based Ensemble methods (Random Forest and GBDT/XGBoost), and Deep Learning architectures.
 
 ---
 
-### References
+### 2. Hedonic Price Modeling (Parametric Econometric Approaches)
+The theoretical foundation of modern real estate valuation originates from Rosen’s (1974) Hedonic Pricing Model (HPM). Rosen posited that goods are valued for their utility-bearing characteristics rather than the good itself. Consequently, the transaction price of a house can be modeled as a function of its individual structural, neighborhood, and environmental attributes:
+
+$$P = f(S, N, E) + \epsilon$$
+
+Where $S$ represents structural features, $N$ represents neighborhood demographics, $E$ represents environmental/geographical indicators, and $\epsilon$ is the random error term.
+
+Traditionally, HPM is estimated using parametric techniques such as Ordinary Least Squares (OLS) linear regression, Ridge regression, or Lasso regression (Malpezzi 2003). 
+*   **Strengths:** The primary advantage of parametric HPM lies in its statistical transparency and interpretability. OLS regression outputs explicit coefficients (beta weights) for each characteristic, enabling economists and appraisers to measure the marginal contribution of individual features (e.g., the exact dollar value increase associated with adding a bedroom) and perform hypothesis testing via t-statistics.
+*   **Limitations and Critique:** Despite its widespread historical adoption, parametric HPM is severely restricted by several theoretical assumptions. OLS assumes that the relationship between property attributes and price is strictly linear or log-linear, which fails to capture complex non-linear dynamics such as the accelerated depreciation of very old properties or diminishing returns on total rooms (Basu and Thibodeau 1998). Furthermore, OLS is highly susceptible to **multicollinearity** (e.g., the high correlation between the number of rooms and bedrooms) and **spatial autocorrelation**, where property values are geographically clustered, violating the assumption of independent and identically distributed (i.i.d.) error terms (Fotheringham, Brunsdon and Charlton 2002).
+
+---
+
+### 3. Non-Parametric Machine Learning & Tree-Based Ensembles
+To address the limitations of parametric linearity, researchers have increasingly adopted non-parametric machine learning models. Unlike HPM, non-parametric algorithms do not assume a predefined mathematical form for the target function, allowing them to learn arbitrary decision boundaries directly from empirical data.
+
+#### **Random Forest Regressors (Bagging)**
+Introduced by Breiman (2001), the Random Forest (RF) algorithm is an ensemble method that constructs a multitude of decision trees during training. To output a prediction, RF averages the outputs of individual trees (bootstrap aggregation, or bagging), while injecting randomness by selecting a random subset of features at each split.
+*   **Synthesis of Literature:** In comparative studies of mass appraisal, Random Forest consistently outperforms linear OLS. Antipov and Pokryshevskaya (2012) demonstrated that RF handles spatial interactions and multicollinearity natively without requiring complex variable transformations. Furthermore, because it averages predictions across hundreds of independent trees, RF exhibits high robustness against overfitting and is insensitive to outliers—a common occurrence in housing datasets containing luxury estates or distressed properties.
+
+#### **Gradient Boosting and XGBoost (Boosting)**
+While Random Forest grows trees in parallel, Gradient Boosting Decision Trees (GBDT) build trees sequentially. Each new tree is trained to predict the residuals (errors) of the preceding trees, using gradient descent optimization to minimize a loss function (Friedman 2001). Chen and Guestrin (2016) optimized this paradigm by introducing **XGBoost (Extreme Gradient Boosting)**, which incorporates a regularized objective function to control model complexity and prevent overfitting, alongside parallelized tree construction.
+*   **Synthesis of Literature:** GBDT and XGBoost have emerged as the state-of-the-art for tabular regression tasks. Mullainathan and Spiess (2017) highlighted that boosting algorithms excel at mapping complex coordinate interactions (Latitude and Longitude) to local neighborhood values, representing a significant improvement over traditional dummy variables for submarkets. The algorithm's built-in handling of missing values and computational efficiency make it highly suitable for production-level API deployment.
+
+---
+
+### 4. Artificial Neural Networks (Connectionist Systems / Deep Learning)
+Artificial Neural Networks (ANNs), particularly Multi-Layer Perceptrons (MLPs), represent another prominent non-parametric paradigm. Drawing inspiration from biological neural pathways, ANNs pass input features through multiple hidden layers of interconnected nodes where non-linear activation functions (e.g., ReLU) are applied (Hornik, Stinchcombe and White 1989).
+
+*   **Synthesis of Literature:** In real estate forecasting, ANNs act as universal function approximators capable of modeling extremely intricate, high-dimensional interactions. Limsombunchao (2004) compared OLS and ANNs on housing datasets and concluded that the connectionist approach achieves lower Root Mean Squared Error (RMSE) due to its ability to model complex structural-spatial interactions.
+*   **Limitations and Critique:** However, deep learning models present significant drawbacks when applied to tabular datasets of moderate size (e.g., under 50,000 observations). Grinsztajn, Oyallon and Varoquaux (2022) conducted extensive benchmarks comparing deep learning architectures to tree ensembles on tabular data, finding that tree-based models (like XGBoost and Random Forest) consistently outperform ANNs. Neural networks are highly sensitive to hyperparameter choices, require extensive data normalization, are computationally expensive to train, and suffer from a complete lack of interpretability (the "black box" problem), making them less practical for real estate markets where transparency is legally or socially required.
+
+---
+
+### 5. Summary and Synthesis of Model Selection
+Based on the literature review, the model selections for this project are justified as follows:
+1.  **Linear Regression** serves as the essential parametric baseline, representing traditional econometric appraisal (HPM) to highlight the performance gains of non-parametric approaches.
+2.  **Random Forest** is selected as a robust bagging ensemble to handle structural multicollinearity and outlier variance.
+3.  **XGBoost** represents the state-of-the-art regularized boosting paradigm, selected for its superior predictive performance on tabular coordinate and demographic data.
+
+---
+
+### 6. References
+*   Antipov, E.A. and Pokryshevskaya, E.B., 2012. Mass appraisal of residential apartments: An application of Random Forest. *International Journal of Housing Markets and Analysis*, 5(2), pp.126-139.
+*   Basu, S. and Thibodeau, T.G., 1998. Analysis of spatial autocorrelation in house prices. *The Journal of Real Estate Finance and Economics*, 17(1), pp.61-85.
 *   Breiman, L., 2001. Random forests. *Machine Learning*, 45(1), pp.5-32.
-*   Goodfellow, I., Bengio, Y. and Courville, A., 2016. *Deep learning*. MIT press.
-*   LeCun, Y., Bengio, Y. and Hinton, G., 2015. Deep learning. *Nature*, 521(7553), pp.436-444.
-*   Lessmann, S., Baesens, B., Seow, H.V. and Thomas, L.C., 2015. Benchmarking state-of-the-art classification algorithms for credit scoring: An update of research. *European Journal of Operational Research*, 247(1), pp.124-136.
+*   Chen, T. and Guestrin, C., 2016. Xgboost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, pp.785-794.
+*   Fotheringham, A.S., Brunsdon, C. and Charlton, M., 2002. *Geographically weighted regression: the analysis of spatially varying relationships*. John Wiley & Sons.
+*   Friedman, J.H., 2001. Greedy function approximation: a gradient boosting machine. *Annals of Statistics*, pp.1189-1232.
+*   Grinsztajn, L., Oyallon, E. and Varoquaux, G., 2022. Why do tree-based models still outperform deep learning on tabular data? *Advances in Neural Information Processing Systems*, 35, pp.507-520.
+*   Hornik, K., Stinchcombe, M. and White, H., 1989. Multilayer feedforward networks are universal approximators. *Neural Networks*, 2(5), pp.359-366.
 *   Limsombunchao, V., 2004. House price prediction: hedonic price model vs. artificial neural network. *New Zealand Agricultural and Resource Economics Society Conference*, pp.25-26.
-*   Tianqi Chen, C.G., 2016. Xgboost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, pp.785-794.
+*   Malpezzi, S., 2003. Hedonic pricing models: a selective and applied review. *Housing Economics and Public Policy*, pp.67-89.
+*   Mullainathan, S. and Spiess, J., 2017. Machine learning: an applied econometric approach. *Journal of Economic Perspectives*, 31(2), pp.87-106.
+*   Rosen, S., 1974. Hedonic prices and implicit markets: product differentiation in pure competition. *Journal of Political Economy*, 82(1), pp.34-55.
+
 ---
 
 ## Section C: Exploratory Data Analysis (EDA) and Model Influence (10 Marks)
