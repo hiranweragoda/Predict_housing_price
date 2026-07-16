@@ -280,6 +280,9 @@ The trained XGBoost model, baseline linear model, Random Forest model, and the p
 
 The deployment demonstrates the practical application of the developed predictive models beyond offline Jupyter notebooks, creating a real-world software tool.
 
+### Summary
+This system architecture merges effective preprocessing, ensemble learning, and user-friendly deployment to create a reliable real estate price prediction system. By combining best practices in machine learning with a practical application interface, the solution meets both technical and professional standards expected in applied machine learning coursework.
+
 ---
 
 ## Section E: Full Model Evaluation & Implementation (40 Marks)
